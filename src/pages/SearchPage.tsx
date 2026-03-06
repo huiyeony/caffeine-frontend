@@ -10,7 +10,7 @@ const SearchPage: React.FC = () => {
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>("");
   const [userQuery, setUserQuery] = useState<string>(""); // 사용자가 입력한 질문을 저장할 상태 추가
-  const [answer, setAnswer] = useState<SearchResult>({ answer: "" });
+  const [answer, setAnswer] = useState<SearchResult>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSearch = async (): Promise<void> => {
@@ -20,10 +20,11 @@ const SearchPage: React.FC = () => {
     const currentQuery = searchText;
     setUserQuery(currentQuery); // 검색 실행 시 질문 내용을 상태에 저장
     setSearchText(""); // 입력창 초기화
+    setAnswer(undefined);
 
     try {
       const response = await axios.get<SearchResult>(
-        `http://localhost:8000/ask?q=${currentQuery}`,
+        `https://${process.env.REACT_APP_API_URL}/ask?q=${currentQuery}`,
         { timeout: 0 },
       );
       setAnswer(response.data);
@@ -137,7 +138,7 @@ const SearchPage: React.FC = () => {
         )}
 
         {/* 답변이 있을 때 AI 말풍선 표시 */}
-        {answer.answer ? (
+        {answer ? (
           <div
             style={{
               display: "flex",
