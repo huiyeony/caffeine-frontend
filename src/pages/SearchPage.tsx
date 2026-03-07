@@ -40,7 +40,7 @@ const SearchPage: React.FC = () => {
       style={{
         margin: "0 auto",
         height: "100dvh",
-        maxWidth: "480px",
+        minWidth: "480px",
         display: "flex",
         flexDirection: "column",
         backgroundColor: "#F9F4F4",
