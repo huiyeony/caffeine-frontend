@@ -34,10 +34,12 @@ const SearchPage: React.FC = () => {
       setIsLoading(false);
     }
   };
+  const isMobile = window.innerWidth <= 768;
 
   return (
     <div
       style={{
+        maxWidth: isMobile ? "480px" : "100%",
         margin: "0 auto",
         height: "100dvh",
         minWidth: "480px",
@@ -71,7 +73,7 @@ const SearchPage: React.FC = () => {
             <span
               style={{ fontWeight: "bold", color: "#333", fontSize: "25px" }}
             >
-              얼마나 카페인
+              👋🏻 얼마나 카페인
             </span>
           </div>
           <span
