@@ -7,7 +7,7 @@ interface SearchResult {
 }
 
 // ✅ 점검 여부 플래그 — true 이면 점검 오버레이 표시
-const IS_UNDER_MAINTENANCE = false;
+const IS_UNDER_MAINTENANCE = true;
 
 const SearchPage: React.FC = () => {
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
