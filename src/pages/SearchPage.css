@@ -6,18 +6,6 @@
 }
 
 @media (min-width: 769px) {
-  .messages {
-    max-width: 760px;
-    width: 100%;
-    align-self: center;
-  }
-
-  .input-area {
-    max-width: 760px;
-    width: 100%;
-    align-self: center;
-  }
-
   .msg-user .bubble,
   .msg-ai .bubble {
     max-width: 60%;
