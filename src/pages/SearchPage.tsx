@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
 
-interface SearchResult {
-  answer: string;
+interface Message {
+  role: "user" | "assistant";
+  content: string;
 }
 
 // ✅ 점검 여부 플래그 — true 이면 점검 오버레이 표시
@@ -12,30 +13,34 @@ const IS_UNDER_MAINTENANCE = false;
 const SearchPage: React.FC = () => {
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>("");
-  const [userQuery, setUserQuery] = useState<string>("");
-  const [answer, setAnswer] = useState<SearchResult>();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
 
   const handleSearch = async (): Promise<void> => {
     if (!searchText.trim()) return;
 
-    setIsLoading(true);
     const currentQuery = searchText;
-    setUserQuery(currentQuery);
     setSearchText("");
-    setAnswer(undefined);
+    setMessages((prev) => [...prev, { role: "user", content: currentQuery }]);
+    setIsLoading(true);
 
     try {
-      const response = await axios.get<SearchResult>(
+      const response = await axios.get<{ answer: string }>(
         `https://${process.env.REACT_APP_API_URL}/ask`,
         {
           params: { q: currentQuery },
           timeout: 0,
         },
       );
-      setAnswer(response.data);
+      setMessages((prev) => [...prev, { role: "assistant", content: response.data.answer }]);
     } catch (error) {
       console.error("검색 오류:", error);
+      setMessages((prev) => [...prev, { role: "assistant", content: "오류가 발생했습니다. 다시 시도해주세요." }]);
     } finally {
       setIsLoading(false);
     }
@@ -174,101 +179,82 @@ const SearchPage: React.FC = () => {
           backgroundColor: "#F9F4F4",
         }}
       >
-        {userQuery && (
+        {messages.length === 0 && !isLoading && (
           <div
             style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              width: "100%",
+              textAlign: "center",
+              marginTop: "100px",
+              color: "#626262",
+              fontSize: "17px",
             }}
           >
-            <div
-              style={{
-                backgroundColor: "#4A90E2",
-                color: "white",
-                padding: "12px 18px",
-                borderRadius: "18px 18px 2px 18px",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                maxWidth: "85%",
-                lineHeight: "1.6",
-                fontSize: "15px",
-                wordBreak: "break-word",
-              }}
-            >
-              {userQuery}
-            </div>
+            <p>궁금한 카페인 함량을 물어보세요.</p>
+            <p style={{ fontSize: "17px", color: "#999", marginTop: "10px" }}>
+              예: 메가커피 메가리카노 카페인 함량 알려줘 .
+            </p>
           </div>
         )}
 
-        {answer ? (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              width: "100%",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "12px",
-                color: "#888",
-                marginBottom: "5px",
-                marginLeft: "5px",
-              }}
-            >
-              AI 분석 결과
-            </span>
+        {messages.map((msg, idx) =>
+          msg.role === "user" ? (
             <div
-              style={{
-                backgroundColor: "white",
-                padding: "15px 20px",
-                borderRadius: "2px 18px 18px 18px",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                maxWidth: "85%",
-                lineHeight: "1.6",
-                fontSize: "15px",
-                color: "#2e2e2e",
-                whiteSpace: "pre-wrap",
-              }}
+              key={idx}
+              style={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
             >
-              {answer.answer}
+              <div
+                style={{
+                  backgroundColor: "#4A90E2",
+                  color: "white",
+                  padding: "12px 18px",
+                  borderRadius: "18px 18px 2px 18px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                  maxWidth: "85%",
+                  lineHeight: "1.6",
+                  fontSize: "15px",
+                  wordBreak: "break-word",
+                }}
+              >
+                {msg.content}
+              </div>
             </div>
-          </div>
-        ) : (
-          !isLoading &&
-          !userQuery && (
+          ) : (
             <div
-              style={{
-                textAlign: "center",
-                marginTop: "100px",
-                color: "#626262",
-                fontSize: "17px",
-              }}
+              key={idx}
+              style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "100%" }}
             >
-              <p>궁금한 카페인 함량을 물어보세요.</p>
-              <p style={{ fontSize: "17px", color: "#999", marginTop: "10px" }}>
-                예: 메가커피 메가리카노 카페인 함량 알려줘 .
-              </p>
+              <span
+                style={{ fontSize: "12px", color: "#888", marginBottom: "5px", marginLeft: "5px" }}
+              >
+                AI 분석 결과
+              </span>
+              <div
+                style={{
+                  backgroundColor: "white",
+                  padding: "15px 20px",
+                  borderRadius: "2px 18px 18px 18px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                  maxWidth: "85%",
+                  lineHeight: "1.6",
+                  fontSize: "15px",
+                  color: "#2e2e2e",
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+                {msg.content}
+              </div>
             </div>
           )
         )}
 
         {isLoading && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "20px",
-            }}
-          >
-            <p
-              style={{ color: "#FF7E7E", fontSize: "16px", fontWeight: "bold" }}
-            >
+          <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+            <p style={{ color: "#FF7E7E", fontSize: "16px", fontWeight: "bold" }}>
               데이터를 분석하고 있습니다. 잠시만 기다려주세요.
             </p>
           </div>
         )}
+
+        <div ref={bottomRef} />
       </div>
 
       {/* 하단 고정 검색바 */}
