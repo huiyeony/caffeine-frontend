@@ -59,8 +59,17 @@ const SearchPage: React.FC = () => {
       <div className="messages">
         {messages.length === 0 && !isLoading && (
           <div className="empty">
-            <p>궁금한 카페인 함량을 물어보세요.</p>
-            <p>예: 메가커피 메가리카노 카페인 함량 알려줘</p>
+            <p className="empty-title">궁금한 카페인 함량을 물어보세요.</p>
+            <div className="usage">
+              <div className="usage-item">
+                <span className="usage-label">브랜드만</span>
+                <span className="usage-desc">스타벅스 메뉴 카페인 알려줘</span>
+              </div>
+              <div className="usage-item">
+                <span className="usage-label">브랜드 + 음료명</span>
+                <span className="usage-desc">메가커피 메가리카노 카페인 얼마야?</span>
+              </div>
+            </div>
           </div>
         )}
 
