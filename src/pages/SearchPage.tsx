@@ -352,9 +352,12 @@ const SearchPage: React.FC<Props> = ({ token, onLogout }) => {
         )}
 
         {isLoading && (
-          <p className="loading">
-            데이터를 분석하고 있습니다. 잠시만 기다려주세요.
-          </p>
+          <div className="typing-indicator">
+            <span className="label">AI 분석 결과</span>
+            <div className="typing-bubble">
+              <span /><span /><span />
+            </div>
+          </div>
         )}
         <div ref={bottomRef} />
       </div>
