@@ -151,10 +151,10 @@ const SearchPage: React.FC<Props> = ({ token, onLogout }) => {
       if (!response.ok) throw new Error();
 
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
-      setIsLoading(false);
 
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
+      let firstChunk = true;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -165,6 +165,7 @@ const SearchPage: React.FC<Props> = ({ token, onLogout }) => {
           if (!line.startsWith("data: ")) continue;
           const data = JSON.parse(line.slice(6));
           if (data.chunk) {
+            if (firstChunk) { setIsLoading(false); firstChunk = false; }
             setMessages((prev) => {
               const updated = [...prev];
               updated[updated.length - 1] = {
