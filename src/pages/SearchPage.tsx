@@ -141,44 +141,15 @@ const SearchPage: React.FC<Props> = ({ token, onLogout }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${BASE_URL}/chatspaces/${chatspaceId}/chats`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ content: currentQuery }),
-      });
-
-      if (response.status === 401) { onLogout(); return; }
-      if (!response.ok) throw new Error();
-
-      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
-
-      const reader = response.body!.getReader();
-      const decoder = new TextDecoder();
-      let firstChunk = true;
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const lines = decoder.decode(value).split("\n");
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const data = JSON.parse(line.slice(6));
-          if (data.chunk) {
-            if (firstChunk) { setIsLoading(false); firstChunk = false; }
-            setMessages((prev) => {
-              const updated = [...prev];
-              updated[updated.length - 1] = {
-                role: "assistant",
-                content: updated[updated.length - 1].content + data.chunk,
-              };
-              return updated;
-            });
-          }
-        }
-      }
+      const response = await axios.post<{ answer: string }>(
+        `${BASE_URL}/chatspaces/${chatspaceId}/chats`,
+        { content: currentQuery },
+        { headers: authHeaders, timeout: 0 },
+      );
+      setMessages((prev) => [...prev, { role: "assistant", content: response.data.answer }]);
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "오류가 발생했습니다. 다시 시도해주세요." }]);
+    } finally {
       setIsLoading(false);
     }
   };
